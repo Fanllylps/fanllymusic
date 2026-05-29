@@ -5,12 +5,12 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -60,38 +60,10 @@ fun FanllyNavGraph() {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Black),
-            enterTransition = {
-                val direction = bottomTabTransitionDirection(
-                    fromRoute = initialState.destination.route,
-                    toRoute = targetState.destination.route
-                )
-                fadeIn(animationSpec = tween(180)) + slideInHorizontally(
-                    animationSpec = tween(220),
-                    initialOffsetX = { width -> if (direction >= 0) width / 10 else -width / 10 }
-                )
-            },
-            exitTransition = {
-                val direction = bottomTabTransitionDirection(
-                    fromRoute = initialState.destination.route,
-                    toRoute = targetState.destination.route
-                )
-                fadeOut(animationSpec = tween(120)) + slideOutHorizontally(
-                    animationSpec = tween(180),
-                    targetOffsetX = { width -> if (direction >= 0) -width / 12 else width / 12 }
-                )
-            },
-            popEnterTransition = {
-                fadeIn(animationSpec = tween(180)) + slideInHorizontally(
-                    animationSpec = tween(220),
-                    initialOffsetX = { width -> -width / 10 }
-                )
-            },
-            popExitTransition = {
-                fadeOut(animationSpec = tween(120)) + slideOutHorizontally(
-                    animationSpec = tween(180),
-                    targetOffsetX = { width -> width / 12 }
-                )
-            }
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
         ) {
             composable(SplashRoute) {
                 SplashScreen {
@@ -158,8 +130,3 @@ private fun hasAudioPermission(context: Context): Boolean {
     return ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 }
 
-private fun bottomTabTransitionDirection(fromRoute: String?, toRoute: String?): Int {
-    val fromIndex = bottomNavDestinations.indexOfFirst { it.route == fromRoute }
-    val toIndex = bottomNavDestinations.indexOfFirst { it.route == toRoute }
-    return if (fromIndex != -1 && toIndex != -1 && toIndex < fromIndex) -1 else 1
-}

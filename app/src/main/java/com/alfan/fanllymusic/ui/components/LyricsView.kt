@@ -1,7 +1,5 @@
 package com.alfan.fanllymusic.ui.components
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -119,35 +117,25 @@ private fun SyncedLyricsView(
                 else                             -> LyricState.NEXT
             }
 
-            val color by animateColorAsState(
-                targetValue = when (state) {
-                    LyricState.ACTIVE -> ACTIVE_COLOR
-                    LyricState.PAST   -> PAST_COLOR
-                    LyricState.NEXT   -> INACTIVE_COLOR
-                },
-                animationSpec = tween(ANIM_MS),
-                label = "lyric_color_$index"
-            )
+            val color = when (state) {
+                LyricState.ACTIVE -> ACTIVE_COLOR
+                LyricState.PAST   -> PAST_COLOR
+                LyricState.NEXT   -> INACTIVE_COLOR
+            }
 
             val scale by animateFloatAsState(
                 targetValue = if (state == LyricState.ACTIVE) 1.075f else 1f,
                 animationSpec = tween(ANIM_MS),
                 label = "lyric_scale_$index"
             )
-            val alpha by animateFloatAsState(
-                targetValue = when (state) {
-                    LyricState.ACTIVE -> 1f
-                    LyricState.NEXT -> 0.92f
-                    LyricState.PAST -> 0.78f
-                },
-                animationSpec = tween(ANIM_MS),
-                label = "lyric_alpha_$index"
-            )
-            val verticalPadding by animateDpAsState(
-                targetValue = if (state == LyricState.ACTIVE) 18.dp else 13.dp,
-                animationSpec = tween(ANIM_MS),
-                label = "lyric_padding_$index"
-            )
+            
+            val alpha = when (state) {
+                LyricState.ACTIVE -> 1f
+                LyricState.NEXT -> 0.92f
+                LyricState.PAST -> 0.78f
+            }
+
+            val verticalPadding = if (state == LyricState.ACTIVE) 18.dp else 13.dp
 
             val fontSize = when (state) {
                 LyricState.ACTIVE -> 39.sp

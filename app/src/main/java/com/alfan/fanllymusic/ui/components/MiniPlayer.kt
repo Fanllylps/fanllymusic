@@ -3,15 +3,12 @@ package com.alfan.fanllymusic.ui.components
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Animatable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -39,11 +36,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -74,20 +69,6 @@ fun MiniPlayer(
         exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
     ) {
         song?.let { currentSong ->
-            val rotation = remember { Animatable(0f) }
-            LaunchedEffect(isPlaying) {
-                if (isPlaying) {
-                    while (true) {
-                        rotation.animateTo(
-                            targetValue = rotation.value + 360f,
-                            animationSpec = tween(18000, easing = LinearEasing)
-                        )
-                    }
-                } else {
-                    rotation.stop()
-                }
-            }
-
             val playerShape = RoundedCornerShape(24.dp)
             val progress = if (durationMs > 0L) {
                 (positionMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f)
@@ -125,7 +106,6 @@ fun MiniPlayer(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .size(44.dp)
-                                .rotate(rotation.value)
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(GlassBorder)
                         )
@@ -136,7 +116,6 @@ fun MiniPlayer(
                             tint = White.copy(alpha = 0.7f),
                             modifier = Modifier
                                 .size(44.dp)
-                                .rotate(rotation.value)
                                 .clip(RoundedCornerShape(14.dp))
                                 .background(GlassBorder)
                                 .padding(10.dp)

@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 
 @Composable
@@ -22,14 +22,19 @@ fun BlurredBackground(albumArtUri: String?) {
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
-                    .blur(96.dp)
-                    .graphicsLayer(alpha = 0.92f)
+                    .graphicsLayer(alpha = 0.28f)
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.38f))
+                .background(
+                    Brush.verticalGradient(
+                        0.0f to Color.Black.copy(alpha = 0.55f),
+                        0.5f to Color.Black.copy(alpha = 0.72f),
+                        1.0f to Color.Black.copy(alpha = 0.88f)
+                    )
+                )
         )
     }
 }

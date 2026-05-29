@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -94,10 +93,10 @@ fun FloatingGlassNavBar(
                 .fillMaxWidth()
                 .height(NAV_BAR_HEIGHT)
                 .shadow(
-                    elevation = 22.dp,
+                    elevation = 12.dp,
                     shape = RoundedCornerShape(NAV_BAR_RADIUS),
-                    ambientColor = Color.Black.copy(alpha = 0.55f),
-                    spotColor = Color.Black.copy(alpha = 0.65f)
+                    ambientColor = Color.Black.copy(alpha = 0.40f),
+                    spotColor = Color.Black.copy(alpha = 0.50f)
                 )
                 .clip(RoundedCornerShape(NAV_BAR_RADIUS))
                 .background(Color.Black.copy(alpha = CONTAINER_ALPHA))
@@ -180,45 +179,32 @@ private fun MovingGlassIndicator(
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val pulse by animateFloatAsState(
-        targetValue = 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "floating_nav_indicator_pulse"
-    )
-
     Box(
         modifier = modifier
             .offset(x = xOffset)
             .width(width)
             .height(INDICATOR_HEIGHT)
-            .graphicsLayer {
-                scaleX = pulse
-                scaleY = pulse
-            }
             .shadow(
-                elevation = 10.dp,
+                elevation = 6.dp,
                 shape = RoundedCornerShape(32.dp),
-                ambientColor = accentColor.copy(alpha = 0.24f),
-                spotColor = accentColor.copy(alpha = 0.28f)
+                ambientColor = accentColor.copy(alpha = 0.18f),
+                spotColor = accentColor.copy(alpha = 0.22f)
             )
             .clip(RoundedCornerShape(32.dp))
-            .background(Color.White.copy(alpha = 0.12f))
+            .background(Color.White.copy(alpha = 0.14f))
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.22f),
+                color = Color.White.copy(alpha = 0.20f),
                 shape = RoundedCornerShape(32.dp)
             ),
         contentAlignment = Alignment.Center
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.72f)
-                .height(34.dp)
+                .fillMaxWidth(0.68f)
+                .height(32.dp)
                 .clip(RoundedCornerShape(24.dp))
-                .background(accentColor.copy(alpha = 0.15f))
+                .background(accentColor.copy(alpha = 0.18f))
         )
     }
 }
