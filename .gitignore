@@ -1,0 +1,12 @@
+.gradle/
+build/
+*/build/
+local.properties
+release.keystore
+release.properties
+*.keystore
+*.jks
+*.mp4
+.cg/
+.claude/
+.opencode/
