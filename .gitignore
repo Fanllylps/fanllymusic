@@ -10,3 +10,10 @@ release.properties
 .cg/
 .claude/
 .opencode/
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
