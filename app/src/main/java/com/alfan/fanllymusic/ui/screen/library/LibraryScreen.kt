@@ -51,6 +51,7 @@ fun LibraryScreen(
 ) {
     val songs by viewModel.songsState.collectAsState()
     val filteredSongs by viewModel.filteredSongs.collectAsState()
+    val recentSongs by viewModel.recentSongs.collectAsState()
     val selectedFilter by viewModel.selectedFilter.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
     var contentVisible by remember { mutableStateOf(false) }
@@ -141,9 +142,6 @@ fun LibraryScreen(
                         )
                     }
                 } else {
-                    val recentSongs = remember(songs) {
-                        songs.sortedByDescending { it.dateAdded }.take(5)
-                    }
                     val allSongs = filteredSongs
 
                     LazyColumn(

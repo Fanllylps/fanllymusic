@@ -14,7 +14,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -33,6 +35,11 @@ class LibraryViewModel @Inject constructor(
     val songsState: StateFlow<List<Song>> =
         songRepository.observeSongs()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val recentSongs: StateFlow<List<Song>> =
+        songsState.map { songs ->
+            songs.sortedByDescending { it.dateAdded }.take(5)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     private val _selectedFilter = MutableStateFlow(LibraryFilter.Songs)
     val selectedFilter: StateFlow<LibraryFilter> = _selectedFilter.asStateFlow()
@@ -144,6 +151,11 @@ class LibraryViewModel @Inject constructor(
             }
             Log.d(TAG, "Local lyrics prefetch finished count=${songs.take(PREFETCH_LYRICS_LIMIT).size}")
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaController.release()
     }
 
     companion object {

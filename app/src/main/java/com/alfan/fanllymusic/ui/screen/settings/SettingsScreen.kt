@@ -1,68 +1,29 @@
 package com.alfan.fanllymusic.ui.screen.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.GraphicEq
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.LibraryMusic
-import androidx.compose.material.icons.rounded.Palette
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.rounded.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.datastore.preferences.core.edit
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.alfan.fanllymusic.data.local.datastore.SettingsKeys
-import com.alfan.fanllymusic.data.local.datastore.settingsDataStore
-import com.alfan.fanllymusic.ui.theme.AccentPink
-import com.alfan.fanllymusic.ui.theme.Black
-import com.alfan.fanllymusic.ui.theme.DarkSurfaceVariant
-import com.alfan.fanllymusic.ui.theme.TextSecondary
-import com.alfan.fanllymusic.ui.theme.White
-import kotlinx.coroutines.launch
+import com.alfan.fanllymusic.ui.theme.*
 
 @Composable
-fun SettingsScreen() {
-    val context = LocalContext.current
-    val prefs by context.settingsDataStore.data.collectAsState(initial = null)
-    val scope = rememberCoroutineScope()
-
-    fun saveBoolean(key: androidx.datastore.preferences.core.Preferences.Key<Boolean>, value: Boolean) {
-        scope.launch { context.settingsDataStore.edit { it[key] = value } }
-    }
-
-    fun saveFloat(key: androidx.datastore.preferences.core.Preferences.Key<Float>, value: Float) {
-        scope.launch { context.settingsDataStore.edit { it[key] = value } }
-    }
-
-    fun saveString(key: androidx.datastore.preferences.core.Preferences.Key<String>, value: String) {
-        scope.launch { context.settingsDataStore.edit { it[key] = value } }
-    }
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val prefs by viewModel.preferences.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -82,48 +43,114 @@ fun SettingsScreen() {
 
         item {
             SettingsCard(icon = Icons.Rounded.GraphicEq, title = "Audio") {
-                SliderSetting("Crossfade", "${(prefs?.get(SettingsKeys.CrossfadeSeconds) ?: 0f).toInt()}s", prefs?.get(SettingsKeys.CrossfadeSeconds) ?: 0f, 0f..10f) {
-                    saveFloat(SettingsKeys.CrossfadeSeconds, it)
+                SettingRowAction("System Equalizer", "Open device audio effects") {
+                    // Handled in ViewModel / Intent later
                 }
-                ToggleSetting("ReplayGain", prefs?.get(SettingsKeys.ReplayGain) ?: false) { saveBoolean(SettingsKeys.ReplayGain, it) }
-                ToggleSetting("Gapless playback", prefs?.get(SettingsKeys.GaplessPlayback) ?: true) { saveBoolean(SettingsKeys.GaplessPlayback, it) }
+                SliderSetting("Bass Boost", "${(prefs?.get(SettingsKeys.BassBoost) ?: 0f).toInt()}%", prefs?.get(SettingsKeys.BassBoost) ?: 0f, 0f..100f) {
+                    viewModel.saveFloat(SettingsKeys.BassBoost, it)
+                }
+                ChoiceSetting("Virtualizer", listOf("Off", "Low", "Medium", "High"), prefs?.get(SettingsKeys.Virtualizer) ?: "Off") {
+                    viewModel.saveString(SettingsKeys.Virtualizer, it)
+                }
+                ChoiceSetting("Volume Normalization", listOf("Off", "Track", "Album"), prefs?.get(SettingsKeys.VolumeNormalization) ?: "Off") {
+                    viewModel.saveString(SettingsKeys.VolumeNormalization, it)
+                }
+                ToggleSetting("Gapless Playback", prefs?.get(SettingsKeys.GaplessPlayback) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.GaplessPlayback, it)
+                }
+                SliderSetting("Crossfade", "${(prefs?.get(SettingsKeys.CrossfadeSeconds) ?: 0f).toInt()}s", prefs?.get(SettingsKeys.CrossfadeSeconds) ?: 0f, 0f..10f) {
+                    viewModel.saveFloat(SettingsKeys.CrossfadeSeconds, it)
+                }
+            }
+        }
+
+        item {
+            SettingsCard(icon = Icons.Rounded.PlayArrow, title = "Playback") {
+                ToggleSetting("Resume last playback", prefs?.get(SettingsKeys.ResumeLastPlayback) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.ResumeLastPlayback, it)
+                }
+                ChoiceSetting("Sleep Timer", listOf("Off", "15", "30", "60", "End of song", "End of queue"), prefs?.get(SettingsKeys.SleepTimerMinutes) ?: "Off") {
+                    viewModel.saveString(SettingsKeys.SleepTimerMinutes, it)
+                }
+                ToggleSetting("Pause when headphone disconnected", prefs?.get(SettingsKeys.PauseHeadphonesDisconnected) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.PauseHeadphonesDisconnected, it)
+                }
+                ToggleSetting("Resume when headphone connected", prefs?.get(SettingsKeys.ResumeHeadphonesConnected) ?: false) {
+                    viewModel.saveBoolean(SettingsKeys.ResumeHeadphonesConnected, it)
+                }
+                ChoiceSetting("Playback Speed", listOf("0.75", "1.0", "1.25", "1.5", "2.0"), (prefs?.get(SettingsKeys.PlaybackSpeed) ?: 1.0f).toString()) {
+                    viewModel.saveFloat(SettingsKeys.PlaybackSpeed, it.toFloatOrNull() ?: 1.0f)
+                }
+            }
+        }
+
+        item {
+            SettingsCard(icon = Icons.Rounded.FormatColorText, title = "Lyrics") {
+                ToggleSetting("Auto-scroll lyrics", prefs?.get(SettingsKeys.LyricsAutoScroll) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.LyricsAutoScroll, it)
+                }
+                ChoiceSetting("Font size", listOf("Small", "Medium", "Large", "Extra Large"), prefs?.get(SettingsKeys.LyricsFontSize) ?: "Medium") {
+                    viewModel.saveString(SettingsKeys.LyricsFontSize, it)
+                }
+                ChoiceSetting("Background", listOf("Blurred artwork", "Dark gradient", "Solid black"), prefs?.get(SettingsKeys.LyricsBackgroundStyle) ?: "Blurred artwork") {
+                    viewModel.saveString(SettingsKeys.LyricsBackgroundStyle, it)
+                }
+                ToggleSetting("Search lyrics automatically", prefs?.get(SettingsKeys.SearchLyricsAutomatically) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.SearchLyricsAutomatically, it)
+                }
+                ToggleSetting("Cache lyrics for offline", prefs?.get(SettingsKeys.CacheLyricsOffline) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.CacheLyricsOffline, it)
+                }
             }
         }
 
         item {
             SettingsCard(icon = Icons.Rounded.Palette, title = "Appearance") {
-                ChoiceSetting("Accent color", listOf("Red", "Pink", "Purple", "Blue", "Teal"), prefs?.get(SettingsKeys.AccentColor) ?: "Pink") {
-                    saveString(SettingsKeys.AccentColor, it)
+                ToggleSetting("Dynamic album art theme", prefs?.get(SettingsKeys.DynamicAlbumArtTheme) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.DynamicAlbumArtTheme, it)
                 }
-                SliderSetting("Album art corners", "${(prefs?.get(SettingsKeys.AlbumArtRadius) ?: 32f).toInt()}dp", prefs?.get(SettingsKeys.AlbumArtRadius) ?: 32f, 0f..32f) {
-                    saveFloat(SettingsKeys.AlbumArtRadius, it)
+                ChoiceSetting("Accent color", listOf("Pink", "Blue", "Purple", "Green", "System"), prefs?.get(SettingsKeys.AccentColor) ?: "Pink") {
+                    viewModel.saveString(SettingsKeys.AccentColor, it)
                 }
-                ChoiceSetting("Mini player", listOf("Compact", "Expanded"), prefs?.get(SettingsKeys.MiniPlayerStyle) ?: "Expanded") {
-                    saveString(SettingsKeys.MiniPlayerStyle, it)
+                ChoiceSetting("Mini player style", listOf("Compact", "Glass", "Minimal"), prefs?.get(SettingsKeys.MiniPlayerStyle) ?: "Glass") {
+                    viewModel.saveString(SettingsKeys.MiniPlayerStyle, it)
                 }
-                SliderSetting("Blur intensity", "${(prefs?.get(SettingsKeys.BlurIntensity) ?: 18f).toInt()}", prefs?.get(SettingsKeys.BlurIntensity) ?: 18f, 0f..25f) {
-                    saveFloat(SettingsKeys.BlurIntensity, it)
+                SliderSetting("Album art corners", "${(prefs?.get(SettingsKeys.AlbumArtRadius) ?: 32f).toInt()}dp", prefs?.get(SettingsKeys.AlbumArtRadius) ?: 32f, 0f..48f) {
+                    viewModel.saveFloat(SettingsKeys.AlbumArtRadius, it)
+                }
+                ToggleSetting("Show lossless badge", prefs?.get(SettingsKeys.ShowLosslessBadge) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.ShowLosslessBadge, it)
                 }
             }
         }
 
         item {
             SettingsCard(icon = Icons.Rounded.LibraryMusic, title = "Library") {
-                ChoiceSetting("Sort songs by", listOf("Name", "Artist", "Date Added", "Duration"), prefs?.get(SettingsKeys.SortBy) ?: "Name") {
-                    saveString(SettingsKeys.SortBy, it)
+                ChoiceSetting("Sort songs by", listOf("Title", "Artist", "Date Added", "Duration"), prefs?.get(SettingsKeys.SortBy) ?: "Title") {
+                    viewModel.saveString(SettingsKeys.SortBy, it)
                 }
-                ToggleSetting("Ascending sort", prefs?.get(SettingsKeys.SortAscending) ?: true) { saveBoolean(SettingsKeys.SortAscending, it) }
-                ChoiceSetting("Group by", listOf("All Songs", "Album", "Artist"), prefs?.get(SettingsKeys.GroupBy) ?: "All Songs") {
-                    saveString(SettingsKeys.GroupBy, it)
+                ToggleSetting("Ascending sort", prefs?.get(SettingsKeys.SortAscending) ?: true) {
+                    viewModel.saveBoolean(SettingsKeys.SortAscending, it)
                 }
-                Text("Scan folders and exclude folders coming next.", color = TextSecondary, style = MaterialTheme.typography.bodySmall)
+                ToggleSetting("Show only lossless", prefs?.get(SettingsKeys.ShowOnlyLossless) ?: false) {
+                    viewModel.saveBoolean(SettingsKeys.ShowOnlyLossless, it)
+                }
+            }
+        }
+
+        item {
+            SettingsCard(icon = Icons.Rounded.Storage, title = "Storage") {
+                SettingRowAction("Clear artwork cache", "Free up space") {}
+                SettingRowAction("Clear lyrics cache", "Delete saved lyrics") {}
+                SettingRowAction("Clear playback history", "Reset history") {}
             }
         }
 
         item {
             SettingsCard(icon = Icons.Rounded.Info, title = "About") {
-                SettingRow("FanllyMusic version", "1.0")
+                SettingRow("App version", "1.0.0")
                 SettingRow("Audio engine", "Media3 ExoPlayer")
+                SettingRow("Credits", "FanllyMusic")
             }
             Spacer(modifier = Modifier.height(180.dp))
         }
@@ -171,20 +198,17 @@ private fun SliderSetting(label: String, valueText: String, value: Float, range:
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ChoiceSetting(label: String, options: List<String>, selected: String, onSelected: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(label, color = White, style = MaterialTheme.typography.bodyMedium)
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-            options.take(4).forEach { option ->
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            options.forEach { option ->
                 FilterChip(selected = selected == option, onClick = { onSelected(option) }, label = { Text(option) })
-            }
-        }
-        if (options.size > 4) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                options.drop(4).forEach { option ->
-                    FilterChip(selected = selected == option, onClick = { onSelected(option) }, label = { Text(option) })
-                }
             }
         }
     }
@@ -195,5 +219,16 @@ private fun SettingRow(label: String, value: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
         Text(text = label, color = TextSecondary, style = MaterialTheme.typography.bodyMedium)
         Text(text = value, color = White, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun SettingRowAction(title: String, subtitle: String, onClick: () -> Unit) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick() }
+        .padding(vertical = 4.dp)) {
+        Text(text = title, color = White, style = MaterialTheme.typography.bodyMedium)
+        Text(text = subtitle, color = TextSecondary, style = MaterialTheme.typography.bodySmall)
     }
 }
